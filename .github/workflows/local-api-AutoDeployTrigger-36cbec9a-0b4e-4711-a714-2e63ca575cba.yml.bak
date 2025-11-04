@@ -35,15 +35,9 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          _targetLabelKey_: _targetLabel_
           registryUrl: anhnguyenkimacr.azurecr.io
           registryUsername: ${{ secrets.LOCALAPI_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.LOCALAPI_REGISTRY_PASSWORD }}
           containerAppName: local-api
           resourceGroup: local-rg
           imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-

@@ -1,0 +1,63 @@
+name: Azure Coontainer Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+
+    env:
+      ACR_NAME: anhnguyenkimacr
+      CONTAINER_APP_NAME: local-api
+      RESOURCE_GROUP: local-rg
+      IMAGE_NAME: samples/hello-world
+      LOCATION: westus2
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Login to Azure with SP credentials
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          registryUrl: anhnguyenkimacr.azurecr.io
+          registryUsername: ${{ secrets.LOCALAPI_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.LOCALAPI_REGISTRY_PASSWORD }}
+          containerAppName: local-api
+          resourceGroup: local-rg
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
+
+      # # Build and push image to ACR
+      # - name: Build and push image to ACR
+      #   run: |
+      #     IMAGE_TAG=${{ github.sha }}
+      #     az acr build \
+      #       --registry $ACR_NAME \
+      #       --resource-group rg-terraform-backend \
+      #       --image $IMAGE_NAME:$IMAGE_TAG \
+            .
+      # # Deploy to Azure Container Apps
+      # - name: Deploy to Container App
+      #   uses: azure/container-apps-deploy-action@v1
+      #   with:
+      #     acrName: ${{ env.ACR_NAME }}
+      #     containerAppName: ${{ env.CONTAINER_APP_NAME }}
+      #     resourceGroup: ${{ env.RESOURCE_GROUP }}
+      #     imageToDeploy: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
