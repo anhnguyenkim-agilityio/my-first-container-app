@@ -31,6 +31,7 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: false
 
         # Log in to Azure Container Registry (ACR)
       - name: Azure ACR Login
