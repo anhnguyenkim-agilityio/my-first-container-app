@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Azure Coontainer Apps CI/CD
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     name: Build and Deploy Job
 
     env:
-      ACR_NAME: anhnguyenacr
+      ACR_NAME: anhnguyenkimacr
       CONTAINER_APP_NAME: local-api
       RESOURCE_GROUP: local-rg
       IMAGE_NAME: samples/hello-world
@@ -52,3 +52,4 @@ jobs:
           containerAppName: ${{ env.CONTAINER_APP_NAME }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           imageToDeploy: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
