@@ -37,6 +37,7 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           az acr build \
             --registry $ACR_NAME \
+            --resource-group rg-terraform-backend \
             --image $IMAGE_NAME:$IMAGE_TAG \
             .
 
