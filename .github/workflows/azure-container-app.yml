@@ -37,8 +37,8 @@ jobs:
         with:
           appSourcePath: ${{ github.workspace }}
           registryUrl: anhnguyenkimacr.azurecr.io
-          registryUsername: ${{ secrets.LOCALAPI_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.LOCALAPI_REGISTRY_PASSWORD }}
+          # registryUsername: ${{ secrets.LOCALAPI_REGISTRY_USERNAME }}
+          # registryPassword: ${{ secrets.LOCALAPI_REGISTRY_PASSWORD }}
           containerAppName: local-api
           resourceGroup: local-rg
           imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
