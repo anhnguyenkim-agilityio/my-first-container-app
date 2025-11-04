@@ -4,19 +4,19 @@ name: Trigger auto deployment for local-api
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
+    branches:
       [ main ]
     paths:
     - '**'
     - '.github/workflows/local-api-AutoDeployTrigger-36cbec9a-0b4e-4711-a714-2e63ca575cba.yml'
 
-  # Allow manual trigger 
-  workflow_dispatch:      
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
@@ -42,7 +42,7 @@ jobs:
           registryPassword: ${{ secrets.LOCALAPI_REGISTRY_PASSWORD }}
           containerAppName: local-api
           resourceGroup: local-rg
-          imageToBuild: anhnguyenkimacr.azurecr.io/local-api:${{ github.sha }}
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
           _buildArgumentsKey_: |
             _buildArgumentsValues_
 
