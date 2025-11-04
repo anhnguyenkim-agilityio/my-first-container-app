@@ -26,7 +26,7 @@ app.add_middleware(
 def test_endpoint():
     data = {
         "status": "success",
-        "message": "Hello from Azure Dockerized API! - v1",
+        "message": "Hello from Azure Dockerized API! - v3",
         "timestamp": datetime.utcnow().isoformat() + "Z",
     }
     return JSONResponse(content=data)
