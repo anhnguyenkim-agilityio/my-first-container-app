@@ -19,7 +19,7 @@ jobs:
       ACR_NAME: anhnguyenacr
       CONTAINER_APP_NAME: local-api
       RESOURCE_GROUP: local-rg
-      IMAGE_NAME: local-api
+      IMAGE_NAME: samples/hello-world
       LOCATION: westus2
 
     steps:
