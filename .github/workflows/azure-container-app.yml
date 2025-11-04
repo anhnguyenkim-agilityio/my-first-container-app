@@ -33,23 +33,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: false
 
-        # Log in to Azure Container Registry (ACR)
-      - name: Azure ACR Login
-        run: az acr login --name $ACR_NAME
-
-      - name: Build and push image to ACR
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          az acr build \
-            --registry $ACR_NAME \
-            --resource-group rg-terraform-backend \
-            --image $IMAGE_NAME:$IMAGE_TAG \
-            .
-
-      - name: Deploy to Container App
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          az containerapp update \
-            --name $CONTAINER_APP_NAME \
-            --resource-group $RESOURCE_GROUP \
-            --image $ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          registryUrl: anhnguyenkimacr.azurecr.io
+          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+          containerAppName: local-api
+          resourceGroup: local-rg
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
