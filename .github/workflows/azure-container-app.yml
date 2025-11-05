@@ -43,4 +43,4 @@ jobs:
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           containerAppName: local-api
           resourceGroup: local-rg
-          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ ENV }}
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ env.ENV }}
