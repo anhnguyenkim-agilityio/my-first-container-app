@@ -137,10 +137,7 @@ USE_AZURE = os.getenv("USE_AZURE_SERVICE_BUS", "False") == "True"
 
 if USE_AZURE:
     # Azure Service Bus Configuration
-    AZURE_SB_NAMESPACE = os.getenv("AZURE_SERVICE_BUS_NAMESPACE")
-    AZURE_SB_SAS_NAME = os.getenv("AZURE_SERVICE_BUS_SAS_KEY_NAME")
-    AZURE_SB_SAS_VALUE = os.getenv("AZURE_SERVICE_BUS_SAS_KEY_VALUE")
-    CELERY_BROKER_URL = f"azureservicebus://{AZURE_SB_SAS_NAME}:{AZURE_SB_SAS_VALUE}@{AZURE_SB_NAMESPACE}"
+    CELERY_BROKER_URL = os.getenv("AZURE_SERVICE_BUS_NAMESPACE", "")
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "queue_name_prefix": "celery-",
         "visibility_timeout": 3600,

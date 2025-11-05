@@ -16,6 +16,7 @@ jobs:
     name: Build and Deploy Job
 
     env:
+      ENV: local
       ACR_NAME: anhnguyenkimacr
       CONTAINER_APP_NAME: local-api
       RESOURCE_GROUP: local-rg
@@ -42,4 +43,4 @@ jobs:
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           containerAppName: local-api
           resourceGroup: local-rg
-          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ ENV }}
