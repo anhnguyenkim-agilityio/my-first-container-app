@@ -132,23 +132,14 @@ REST_FRAMEWORK = {
 }
 
 # Celery Configuration
-# Check if we should use Azure Service Bus or Redis
-USE_AZURE = os.getenv("USE_AZURE_SERVICE_BUS", "False") == "True"
+# Azure Service Bus Configuration
+CELERY_BROKER_URL = os.getenv("AZURE_SERVICE_BUS_NAMESPACE", "")
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "queue_name_prefix": "celery-",
+    "visibility_timeout": 3600,
+    "polling_interval": 1,
+}
 
-if USE_AZURE:
-    # Azure Service Bus Configuration
-    CELERY_BROKER_URL = os.getenv("AZURE_SERVICE_BUS_NAMESPACE", "")
-    CELERY_BROKER_TRANSPORT_OPTIONS = {
-        "queue_name_prefix": "celery-",
-        "visibility_timeout": 3600,
-        "polling_interval": 1,
-    }
-else:
-    # Redis Configuration (for local development)
-    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-    CELERY_BROKER_TRANSPORT_OPTIONS = {}
-
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
