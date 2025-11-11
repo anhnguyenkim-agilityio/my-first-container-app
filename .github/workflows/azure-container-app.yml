@@ -16,10 +16,10 @@ jobs:
     name: Build and Deploy Job
 
     env:
-      ENV: local
+      ENV: dev
       ACR_NAME: anhnguyenkimacr
-      CONTAINER_APP_NAME: local-api
-      RESOURCE_GROUP: local-rg
+      CONTAINER_APP_NAME: dev-app
+      RESOURCE_GROUP: dev-rg
       IMAGE_NAME: samples/hello-world
       LOCATION: westus2
 
@@ -41,6 +41,6 @@ jobs:
           registryUrl: anhnguyenkimacr.azurecr.io
           registryUsername: ${{ secrets.REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
-          containerAppName: local-api
-          resourceGroup: local-rg
+          containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
           imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ env.ENV }}
