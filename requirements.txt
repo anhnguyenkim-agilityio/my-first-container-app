@@ -1,4 +1,4 @@
-Django==4.2.7
+Django
 djangorestframework==3.14.0
 celery==5.3.4
 azure-servicebus==7.11.4
@@ -6,3 +6,5 @@ python-dotenv==1.0.0
 redis==5.0.1
 gunicorn
 uvicorn
+mssql-django
+django-cors-headers
