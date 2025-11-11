@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "api",
     "corsheaders",
+    "storages",
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -186,3 +187,27 @@ CORS_ALLOW_HEADERS = [
     "x-intelligence-client-id",
     "x-intelligence-client-secret",
 ]
+
+
+STATIC_ENV = os.getenv("STATIC_ENV", "azure")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+if STATIC_ENV == "local":
+    STATIC_URL = "/static/"
+elif STATIC_ENV == "azure":
+    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_STORAGE_ACCOUNT")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_STORAGE_KEY")
+    AZURE_CONTAINER = os.getenv("AZURE_STORAGE_CONTAINER")
+    STATIC_URL = (
+        f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
+    )
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+    }

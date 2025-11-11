@@ -51,6 +51,6 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-ENTRYPOINT ["./bin/entrypoint.sh"]
+# ENTRYPOINT ["./bin/entrypoint.sh"]
 # Default command (can be overridden in docker-compose)
 CMD ["gunicorn", "test_project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "4"]
