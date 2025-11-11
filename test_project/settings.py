@@ -43,9 +43,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -166,13 +166,23 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "*"
-    # "https://icy-bush-026a07d1e.3.azurestaticapps.net",
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "content-disposition",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-customer-token",
+    "x-postcredit-signature",
+    "x-production-account",
+    "x-twilio-signature",
+    "x-intelligence-client-id",
+    "x-intelligence-client-secret",
 ]
-
-# Option 2: Allow all origins (ONLY for development/testing)
-CORS_ALLOW_ALL_ORIGINS = True  # DO NOT use in production
-
-# Optional: Allow credentials (cookies, auth headers)
-CORS_ALLOW_CREDENTIALS = True
