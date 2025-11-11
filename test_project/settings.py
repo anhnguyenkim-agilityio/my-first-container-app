@@ -212,3 +212,8 @@ elif STATIC_ENV == "azure":
             "BACKEND": "storages.backends.azure_storage.AzureStorage",
         },
     }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://20.125.55.61",
+    "https://icy-bush-026a07d1e.3.azurestaticapps.net",
+]
