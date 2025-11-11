@@ -41,6 +41,8 @@ RUN pip install --upgrade pip && \
 # Copy project files
 COPY . .
 
+RUN chmod -R +x bin/
+
 # Create a non-root user
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
@@ -49,5 +51,6 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
+ENTRYPOINT ["./bin/entrypoint.sh"]
 # Default command (can be overridden in docker-compose)
-# CMD ["gunicorn", "test_project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "4"]
+CMD ["gunicorn", "test_project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "4"]
