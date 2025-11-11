@@ -199,6 +199,8 @@ elif STATIC_ENV == "azure":
     AZURE_ACCOUNT_NAME = os.getenv("AZURE_STORAGE_ACCOUNT")
     AZURE_ACCOUNT_KEY = os.getenv("AZURE_STORAGE_KEY")
     AZURE_CONTAINER = os.getenv("AZURE_STORAGE_CONTAINER")
+    AZURE_STATIC_CONTAINER = "static"
+
     STATIC_URL = (
         f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
     )
