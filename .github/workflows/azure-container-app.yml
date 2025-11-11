@@ -43,4 +43,4 @@ jobs:
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           containerAppName: ${{ env.CONTAINER_APP_NAME }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
-          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ env.ENV }}
+          imageToBuild: anhnguyenkimacr.azurecr.io/samples/hello-world:${{ github.sha }}
