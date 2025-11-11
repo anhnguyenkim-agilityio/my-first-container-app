@@ -41,7 +41,7 @@ RUN pip install --upgrade pip && \
 # Copy project files
 COPY . .
 
-RUN chmod -R +x bin/
+RUN chmod -R +x /app/bin/
 
 # Create a non-root user
 RUN useradd -m -u 1000 appuser && \
