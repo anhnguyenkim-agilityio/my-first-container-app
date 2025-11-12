@@ -26,7 +26,10 @@ SECRET_KEY = "django-insecure-q!7)mw)n6ckni4b^kn59okvijn&&*lt(#r()bq57rd!jos66#1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "https://dev-api.anhnguyen.site",
+    "https://dev.anhnguyen.site",
+]
 
 # Application definition
 
@@ -214,6 +217,6 @@ elif STATIC_ENV == "azure":
     }
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://20.125.55.61",
-    "https://icy-bush-026a07d1e.3.azurestaticapps.net",
+    "https://dev-api.anhnguyen.site",
+    "https://dev.anhnguyen.site",
 ]
