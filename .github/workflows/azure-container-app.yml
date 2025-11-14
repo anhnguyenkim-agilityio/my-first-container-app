@@ -33,6 +33,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Determine ENV from branch
+      - name: Set ENV
+        id: set-env
+        run: |
+          if [[ "${GITHUB_REF_NAME}" != "dev" && "${GITHUB_REF_NAME}" != "stag" && "${GITHUB_REF_NAME}" != "main" ]]; then
+            echo "Branch not configured for deployment. Exiting."
+            exit 1
+          fi
+          # ENV="${GITHUB_REF_NAME}"
+          ENV="dev"
+          echo "ENV=${ENV}" >> $GITHUB_ENV
+
       - name: Set Image Tag
         id: set-tag
         run: |
