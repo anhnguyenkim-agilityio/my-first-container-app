@@ -21,7 +21,7 @@ jobs:
       image-tag: ${{ steps.set-tag.outputs.IMAGE_TAG }}
 
     env:
-      ACR_NAME: anhnguyenkimacr
+      ACR_NAME: f2kwkhdb8vhvacr
       IMAGE_NAME: samples/hello-world
 
     steps:
