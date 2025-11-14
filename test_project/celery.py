@@ -11,17 +11,17 @@ app.autodiscover_tasks()
 
 # Celery Beat Schedule
 app.conf.beat_schedule = {
-    "send-daily-report": {
-        "task": "api.tasks.send_daily_report",
-        "schedule": crontab(hour=9, minute=0),  # Every day at 9 AM
-    },
-    "cleanup-old-data": {
-        "task": "api.tasks.cleanup_old_data",
-        "schedule": crontab(hour=2, minute=0),  # Every day at 2 AM
-    },
-    "health-check-every-5-minutes": {
+    # "send-daily-report": {
+    #     "task": "api.tasks.send_daily_report",
+    #     "schedule": crontab(hour=9, minute=0),  # Every day at 9 AM
+    # },
+    # "cleanup-old-data": {
+    #     "task": "api.tasks.cleanup_old_data",
+    #     "schedule": crontab(hour=2, minute=0),  # Every day at 2 AM
+    # },
+    "health-check-every-1-minute": {
         "task": "api.tasks.health_check",
-        "schedule": 10.0,  # Every 5 minutes (in seconds)
+        "schedule": 60.0,
     },
 }
 
