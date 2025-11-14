@@ -7,22 +7,17 @@ on:
       - stag
       - main
 
+env:
+  ACR_NAME: f2kwkhdb8vhvacr
+  IMAGE_NAME: samples/hello-world
+
 jobs:
 
-  #
-  # -------------------------------
-  #  JOB 1 — BUILD + PUSH TO ACR
-  # -------------------------------
-  #
-  build_acr:
+  build_and_push_acr:
     runs-on: ubuntu-latest
 
     outputs:
       image-tag: ${{ steps.set-tag.outputs.IMAGE_TAG }}
-
-    env:
-      ACR_NAME: f2kwkhdb8vhvacr
-      IMAGE_NAME: samples/hello-world
 
     steps:
       - name: Checkout code
@@ -61,19 +56,9 @@ jobs:
       - name: Push Docker Image
         run: docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.set-tag.outputs.IMAGE_TAG }}
 
-
-  #
-  # -------------------------------
-  #  JOB 2 — DEPLOY BASED ON BRANCH
-  # -------------------------------
-  #
   deploy_container:
     runs-on: ubuntu-latest
-    needs: build_acr
-
-    env:
-      ACR_NAME: anhnguyenkimacr
-      IMAGE_NAME: samples/hello-world
+    needs: build_and_push_acr
 
     steps:
       - name: Azure Login
