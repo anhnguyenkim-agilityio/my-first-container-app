@@ -26,7 +26,7 @@ stages:
     - task: AzureCLI@2
       displayName: "Login to ACR"
       inputs:
-        azureSubscription: "MyServiceConnection"
+        azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
