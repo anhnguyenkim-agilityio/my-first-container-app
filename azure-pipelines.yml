@@ -49,11 +49,11 @@ stages:
         IMAGE_TAG="${ENV_NAME}-${SHORT_SHA}"
         RG_NAME="${ENV_NAME}-rg"
         RG_NAME="${ENV_NAME}-rg"
+        export IMAGE_TAG="${IMAGE_TAG}"
+        export RG_NAME="${RG_NAME}"
+
         echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$IMAGE_TAG"
         echo "##vso[task.setvariable variable=RG_NAME;isOutput=true]$RG_NAME"
-        echo "Image tag will be: $IMAGE_TAG"
-        export IMAGE_TAG="$IMAGE_TAG"
-        export RG_NAME="$RG_NAME"
       name: SetImageTag
       displayName: "Set image tag"
 
@@ -99,3 +99,11 @@ stages:
                 --resource-group $(RG_NAME) \
                 --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
             done
+
+
+      # # App1 with 2 containers
+      # az containerapp update \
+      #   --name app1 \
+      #   --resource-group $RG_NAME \
+      #   --containers '[{"name":"frontend","image":"$(ACR_NAME).azurecr.io/frontend:'"$IMAGE_TAG"'"},
+      #                  {"name":"backend","image":"$(ACR_NAME).azurecr.io/backend:'"$IMAGE_TAG"'"}]'
