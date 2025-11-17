@@ -9,11 +9,20 @@ variables:
   - name: IMAGE_NAME
     value: "samples/hello-world"
 
-  - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
+  - name: GITHUB_SERVICE_CONNECTION
     value: "github.com_anhnguyenkim-agilityio"
+
+  - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
+    value: "AzureRMConnection"
 
 pool:
   name: Default
+
+resources:
+  repositories:
+  - repository: self
+    type: github
+    name: $(GITHUB_SERVICE_CONNECTION)/my-first-container-app
 
 stages:
 # Build and push image
