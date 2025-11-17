@@ -69,9 +69,9 @@ stages:
 
     # Build and push container image
     - bash: |
-        echo "Building image: $(ACR_NAME).azurecr.io/$IMAGE_NAME:$IMAGE_TAG"
-        docker build -t $(ACR_NAME).azurecr.io/$IMAGE_NAME:$IMAGE_TAG .
-        docker push $(ACR_NAME).azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG .
+        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG
       displayName: "Build & Push Docker Image"
 
 - stage: Deploy
