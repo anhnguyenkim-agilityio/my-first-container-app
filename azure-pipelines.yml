@@ -83,32 +83,32 @@ stages:
 #           echo "Running tests..."
 #         displayName: "Run Unit/Integration Tests"
 
-# - stage: Deploy
-#   displayName: "Deploy Container Apps"
-#   dependsOn: Build
-#   jobs:
-#     - job: Deploy
-#       variables:
-#         # Reference output from Build job
-#         IMAGE_TAG: $[ dependencies.Build.outputs['SetEnvs.imageTag'] ]
-#         RG_NAME: $[ dependencies.Build.outputs['SetEnvs.rgName'] ]
-#       steps:
-#       - task: AzureCLI@2
-#         displayName: "Deploy all apps"
-#         inputs:
-#           azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
-#           scriptType: bash
-#           scriptLocation: inlineScript
-#           inlineScript: |
-#             echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
+- stage: Deploy
+  displayName: "Deploy Container Apps"
+  dependsOn: Build
+  jobs:
+    - job: Deploy
+      variables:
+        # Reference output from Build job
+        IMAGE_TAG: $[ dependencies.Build.outputs['SetEnvs.imageTag'] ]
+        RG_NAME: $[ dependencies.Build.outputs['SetEnvs.rgName'] ]
+      steps:
+      - task: AzureCLI@2
+        displayName: "Deploy all apps"
+        inputs:
+          azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
 
-#             for app in $(containerApps); do
-#               echo "Updating $app ..."
-#               az containerapp update \
-#                 --name $app \
-#                 --resource-group $(RG_NAME) \
-#                 --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
-#             done
+            for app in $(containerApps); do
+              echo "Updating $app ..."
+              az containerapp update \
+                --name $app \
+                --resource-group $(RG_NAME) \
+                --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
+            done
 
 
 #       # # App1 with 2 containers
