@@ -82,7 +82,11 @@ stages:
 - stage: Test
   displayName: Run Tests
   dependsOn: Build
-  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'main'))
+  condition: or(
+    eq(variables['Build.Reason'], 'PullRequest'),
+    eq(variables['Build.SourceBranchName'], 'main'),
+    eq(variables['Build.SourceBranchName'], 'develop',
+    eq(variables['Build.SourceBranchName'], 'staging')))
   jobs:
   - job: RunTests
     steps:
