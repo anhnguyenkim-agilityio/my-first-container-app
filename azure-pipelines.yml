@@ -38,11 +38,17 @@ stages:
   - job: Build
     steps:
     - bash: |
-        if [ "$(Build.SourceBranchName)" == "main" ]; then
-          echo "##vso[task.setvariable variable=ENV]dev"
+        echo "Branch name: $(Build.SourceBranchName)"
+        if [ "$(Build.SourceBranchName)" = "main" ]; then
+          ENV_NAME="dev"
+        elif [ "$(Build.SourceBranchName)" = "develop" ]; then
+          ENV_NAME="staging"
+        else
+          ENV_NAME="dev"
         fi
+
         SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
-        IMAGE_TAG="$(ENV)-${SHORT_SHA}"
+        IMAGE_TAG="${ENV_NAME}-${SHORT_SHA}"
         echo "##vso[task.setvariable variable=IMAGE_TAG]$IMAGE_TAG"
         echo "Image tag will be: $IMAGE_TAG"
       displayName: "Set image tag"
