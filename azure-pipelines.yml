@@ -82,10 +82,7 @@ stages:
 - stage: Test
   displayName: Run Tests
   dependsOn: Build
-  condition: or(
-      eq(variables['Build.Reason'], 'PullRequest'),
-      eq(variables['Build.SourceBranchName'], 'develop')
-    )
+  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'main'))
   jobs:
   - job: RunTests
     steps:
@@ -99,14 +96,7 @@ stages:
   dependsOn:
     - Test
     - Build
-  condition: and(
-      succeeded(),
-      or(
-        eq(variables['Build.SourceBranchName'], 'develop')
-        eq(variables['Build.SourceBranchName'], 'staging')
-        eq(variables['Build.SourceBranchName'], 'main'),
-      )
-    )
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main')))
   jobs:
     - job: RunMigrationJob
       variables:
@@ -165,14 +155,7 @@ stages:
     # Reference output from Build job
     IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
     ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
-  condition: and(
-      succeeded(),
-      or(
-        eq(variables['Build.SourceBranchName'], 'develop')
-        eq(variables['Build.SourceBranchName'], 'staging')
-        eq(variables['Build.SourceBranchName'], 'main'),
-      )
-    )
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main')))
   jobs:
     - deployment: DeployToEnv
       displayName: Deploy Container App
