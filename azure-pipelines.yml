@@ -15,9 +15,6 @@ variables:
   - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
     value: "AzureConnection"
 
-  - name: RG_NAME
-    value: "dev-rg"
-
   - name: containerApps
     value: "dev-app"
 
@@ -49,8 +46,12 @@ stages:
 
         SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
         IMAGE_TAG="${ENV_NAME}-${SHORT_SHA}"
-        echo "##vso[task.setvariable variable=IMAGE_TAG]$IMAGE_TAG"
+        RG_NAME="${ENV_NAME}-rg"
+        RG_NAME="${ENV_NAME}-rg"
+        echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$IMAGE_TAG"
+        echo "##vso[task.setvariable variable=RG_NAME;isOutput=true]$RG_NAME"
         echo "Image tag will be: $IMAGE_TAG"
+      name: SetImageTag
       displayName: "Set image tag"
 
     - task: AzureCLI@2
@@ -73,6 +74,10 @@ stages:
   dependsOn: Build
   jobs:
     - job: Deploy
+      variables:
+        # Reference output from Build job
+        IMAGE_TAG: $[ dependencies.Build.outputs['SetImageTag.IMAGE_TAG'] ]
+        RG_NAME: $[ dependencies.Build.outputs['SetImageTag.RG_NAME'] ]
       steps:
       - task: AzureCLI@2
         displayName: "Deploy all apps"
@@ -90,18 +95,3 @@ stages:
                 --resource-group $(RG_NAME) \
                 --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
             done
-  #         - checkout: self
-
-  #         - script: |
-  #             if [ "$(Build.SourceBranchName)" == "main" ]; then
-  #               echo "##vso[task.setvariable variable=ENV]dev"
-  #             fi
-  #           displayName: "Select environment token"
-
-  #         - task: AzureContainerApps@1
-  #           inputs:
-  #             appSourcePath: '$(Build.SourcesDirectory)'
-  #             azureSubscription: '$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)'
-  #             acrName: '$(ACR_NAME)'
-  #             containerAppName: 'my-container-app'
-  #             resourceGroup: 'my-container-app-rg'
