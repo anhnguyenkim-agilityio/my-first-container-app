@@ -61,28 +61,29 @@ stages:
         docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG) .
         docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)
       displayName: "Build & Push Docker Image"
-  - stage: Deploy
-    displayName: "Deploy Container Apps"
-    dependsOn: Build
-    jobs:
-      - job: Deploy
-        steps:
-        - task: AzureCLI@2
-          displayName: "Deploy all apps"
-          inputs:
-            azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
-            scriptType: bash
-            scriptLocation: inlineScript
-            inlineScript: |
-              echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
 
-              for app in $(containerApps); do
-                echo "Updating $app ..."
-                az containerapp update \
-                  --name $app \
-                  --resource-group $(RG_NAME) \
-                  --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
-              done
+- stage: Deploy
+  displayName: "Deploy Container Apps"
+  dependsOn: Build
+  jobs:
+    - job: Deploy
+      steps:
+      - task: AzureCLI@2
+        displayName: "Deploy all apps"
+        inputs:
+          azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
+
+            for app in $(containerApps); do
+              echo "Updating $app ..."
+              az containerapp update \
+                --name $app \
+                --resource-group $(RG_NAME) \
+                --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
+            done
   #         - checkout: self
 
   #         - script: |
