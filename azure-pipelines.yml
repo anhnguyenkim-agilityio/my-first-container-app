@@ -28,7 +28,8 @@ stages:
       inputs:
         azureSubscription: "MyServiceConnection"
         scriptType: bash
-        scriptLocation: inlineScript: |
+        scriptLocation: inlineScript
+        inlineScript: |
           az acr login --name $(ACR_NAME)
 
     - script: |
