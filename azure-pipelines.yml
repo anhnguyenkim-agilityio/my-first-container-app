@@ -52,13 +52,8 @@ stages:
         echo "Image tag: $IMAGE_TAG"
         echo "Resource group: $RG_NAME"
 
-        # # # Export variables for use in subsequent steps in this job
-        # export IMAGE_TAG="$IMAGE_TAG"
-        # export RG_NAME="$RG_NAME"
-
-        # # Also set output variables for next stage
-        # echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
-        # echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
+        echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
+        echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
       name: SetImageTag
       displayName: "Set image tag"
 
@@ -73,9 +68,9 @@ stages:
           az acr login --name $(ACR_NAME)
 
     - bash: |
-        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
-        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG .
-        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG
+        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag)"
+        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag) .
+        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag)
       displayName: "Build & Push Docker Image"
 
 # - stage: Test
