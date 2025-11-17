@@ -52,13 +52,13 @@ stages:
         echo "Image tag: $IMAGE_TAG"
         echo "Resource group: $RG_NAME"
 
-        # # Export variables for use in subsequent steps in this job
-        export IMAGE_TAG="$IMAGE_TAG"
-        export RG_NAME="$RG_NAME"
+        # # # Export variables for use in subsequent steps in this job
+        # export IMAGE_TAG="$IMAGE_TAG"
+        # export RG_NAME="$RG_NAME"
 
-        # Also set output variables for next stage
-        echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
-        echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
+        # # Also set output variables for next stage
+        # echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
+        # echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
       name: SetImageTag
       displayName: "Set image tag"
 
@@ -78,37 +78,47 @@ stages:
         docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG
       displayName: "Build & Push Docker Image"
 
-- stage: Deploy
-  displayName: "Deploy Container Apps"
-  dependsOn: Build
-  jobs:
-    - job: Deploy
-      variables:
-        # Reference output from Build job
-        IMAGE_TAG: $[ dependencies.Build.outputs['SetImageTag.imageTag'] ]
-        RG_NAME: $[ dependencies.Build.outputs['SetImageTag.rgName'] ]
-      steps:
-      - task: AzureCLI@2
-        displayName: "Deploy all apps"
-        inputs:
-          azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-            echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
+# - stage: Test
+#   displayName: Run Tests
+#   dependsOn: Build
+#   jobs:
+#   - job: RunTests
+#     steps:
+#       - bash: |
+#           echo "Running tests..."
+#         displayName: "Run Unit/Integration Tests"
 
-            for app in $(containerApps); do
-              echo "Updating $app ..."
-              az containerapp update \
-                --name $app \
-                --resource-group $(RG_NAME) \
-                --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
-            done
+# - stage: Deploy
+#   displayName: "Deploy Container Apps"
+#   dependsOn: Build
+#   jobs:
+#     - job: Deploy
+#       variables:
+#         # Reference output from Build job
+#         IMAGE_TAG: $[ dependencies.Build.outputs['SetImageTag.imageTag'] ]
+#         RG_NAME: $[ dependencies.Build.outputs['SetImageTag.rgName'] ]
+#       steps:
+#       - task: AzureCLI@2
+#         displayName: "Deploy all apps"
+#         inputs:
+#           azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+#           scriptType: bash
+#           scriptLocation: inlineScript
+#           inlineScript: |
+#             echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
+
+#             for app in $(containerApps); do
+#               echo "Updating $app ..."
+#               az containerapp update \
+#                 --name $app \
+#                 --resource-group $(RG_NAME) \
+#                 --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
+#             done
 
 
-      # # App1 with 2 containers
-      # az containerapp update \
-      #   --name app1 \
-      #   --resource-group $RG_NAME \
-      #   --containers '[{"name":"frontend","image":"$(ACR_NAME).azurecr.io/frontend:'"$IMAGE_TAG"'"},
-      #                  {"name":"backend","image":"$(ACR_NAME).azurecr.io/backend:'"$IMAGE_TAG"'"}]'
+#       # # App1 with 2 containers
+#       # az containerapp update \
+#       #   --name app1 \
+#       #   --resource-group $RG_NAME \
+#       #   --containers '[{"name":"frontend","image":"$(ACR_NAME).azurecr.io/frontend:'"$IMAGE_TAG"'"},
+#       #                  {"name":"backend","image":"$(ACR_NAME).azurecr.io/backend:'"$IMAGE_TAG"'"}]'
