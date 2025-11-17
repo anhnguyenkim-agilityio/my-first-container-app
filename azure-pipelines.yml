@@ -48,12 +48,10 @@ stages:
 
         SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
         IMAGE_TAG="${ENV_NAME}-$SHORT_SHA"
-        RG_NAME="${ENV_NAME}-rg"
         echo "Image tag: $IMAGE_TAG"
-        echo "Resource group: $RG_NAME"
 
         echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
-        echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
+        echo "##vso[task.setvariable variable=envName;isOutput=true]$ENV_NAME"
       name: SetEnvs
       displayName: "Set image tag"
 
@@ -91,7 +89,7 @@ stages:
       variables:
         # Reference output from Build job
         IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
-        RG_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.rgName'] ]
+        ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
       steps:
       - task: AzureCLI@2
         displayName: "Deploy all apps"
@@ -103,8 +101,8 @@ stages:
             echo "Deploying image: $(IMAGE_NAME):$IMAGE_TAG"
 
             az containerapp update \
-              --name $app \
-              --resource-group $RG_NAME \
+              --name $ENV_NAME-app \
+              --resource-group $ENV_NAME-rg \
               --containers '[{"name":"api","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"},
                             {"name":"worker","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"}]'
 # --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
