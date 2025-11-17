@@ -102,18 +102,9 @@ stages:
           inlineScript: |
             echo "Deploying image: $(IMAGE_NAME):$IMAGE_TAG"
 
-            for app in $(containerApps); do
-              echo "Updating $app ..."
-              az containerapp update \
-                --name $app \
-                --resource-group $RG_NAME \
-                --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
-            done
-
-
-#       # # App1 with 2 containers
-#       # az containerapp update \
-#       #   --name app1 \
-#       #   --resource-group $RG_NAME \
-#       #   --containers '[{"name":"frontend","image":"$(ACR_NAME).azurecr.io/frontend:'"$IMAGE_TAG"'"},
-#       #                  {"name":"backend","image":"$(ACR_NAME).azurecr.io/backend:'"$IMAGE_TAG"'"}]'
+            az containerapp update \
+              --name $app \
+              --resource-group $RG_NAME \
+              --containers '[{"name":"api","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"},
+                            {"name":"worker","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"}]'
+# --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
