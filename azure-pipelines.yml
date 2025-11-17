@@ -81,9 +81,60 @@ stages:
 #           echo "Running tests..."
 #         displayName: "Run Unit/Integration Tests"
 
+- stage: Migrate
+  displayName: Run Django Migrations Job
+  dependsOn: Build
+  jobs:
+    - job: RunMigrationJob
+      variables:
+        # Reference output from Build job
+        ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
+      steps:
+        - task: AzureCLI@2
+          displayName: "Run Django Migration Job"
+          inputs:
+            azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              echo "Starting migration job..."
+              az containerapp job start \
+                --name django-migrate-job \
+                --resource-group $ENV_NAME-rg
+
+              echo "Waiting for job to finish..."
+
+              # Fetch job execution status until 'Completed'
+              JOB_EXEC_ID=$(az containerapp job execution list \
+                --name django-migrate-job \
+                --resource-group $ENV_NAME-rg \
+                --query "[0].name" -o tsv)
+
+              while true; do
+                STATUS=$(az containerapp job execution show \
+                  --name django-migrate-job \
+                  --resource-group $ENV_NAME-rg \
+                  --job-execution-name $JOB_EXEC_ID \
+                  --query "properties.status" -o tsv)
+
+                echo "Job status: $STATUS"
+
+                if [ "$STATUS" = "Succeeded" ]; then
+                  echo "Migration job succeeded."
+                  break
+                fi
+
+                if [ "$STATUS" = "Failed" ]; then
+                  echo "Migration job FAILED."
+                  exit 1
+                fi
+
+                sleep 5
+              done
+
 - stage: Deploy
   displayName: "Deploy Container Apps"
-  dependsOn: Build
+  dependsOn: Migrate
   jobs:
     - job: Deploy
       variables:
