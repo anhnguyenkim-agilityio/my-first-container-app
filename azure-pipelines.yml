@@ -13,7 +13,7 @@ variables:
     value: "github.com_anhnguyenkim-agilityio"
 
   - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
-    value: "AzureRMConnection"
+    value: "AzureConnection"
 
 pool:
   name: Default
