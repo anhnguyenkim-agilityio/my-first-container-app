@@ -159,7 +159,7 @@ stages:
   jobs:
     - deployment: DeployToEnv
       displayName: Deploy Container App
-      environment: $ENV_NAME
+      environment: $(ENV_NAME)
 
       strategy:
         runOnce:
