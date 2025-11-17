@@ -54,7 +54,7 @@ stages:
 
         echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
         echo "##vso[task.setvariable variable=rgName;isOutput=true]$RG_NAME"
-      name: SetImageTag
+      name: SetEnvs
       displayName: "Set image tag"
 
     # Login to ACR
@@ -68,9 +68,9 @@ stages:
           az acr login --name $(ACR_NAME)
 
     - bash: |
-        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag)"
-        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag) .
-        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(imageTag)
+        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(SetEnvs.imageTag)"
+        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(SetEnvs.imageTag) .
+        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(SetEnvs.imageTag)
       displayName: "Build & Push Docker Image"
 
 # - stage: Test
@@ -90,8 +90,8 @@ stages:
 #     - job: Deploy
 #       variables:
 #         # Reference output from Build job
-#         IMAGE_TAG: $[ dependencies.Build.outputs['SetImageTag.imageTag'] ]
-#         RG_NAME: $[ dependencies.Build.outputs['SetImageTag.rgName'] ]
+#         IMAGE_TAG: $[ dependencies.Build.outputs['SetEnvs.imageTag'] ]
+#         RG_NAME: $[ dependencies.Build.outputs['SetEnvs.rgName'] ]
 #       steps:
 #       - task: AzureCLI@2
 #         displayName: "Deploy all apps"
