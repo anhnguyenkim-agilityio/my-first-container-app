@@ -1,7 +1,14 @@
 trigger:
   branches:
     include:
+      - develop
+      - staging
       - main
+
+pr:
+  branches:
+    include:
+      - "*"
 
 variables:
   - name: ACR_NAME
@@ -28,9 +35,9 @@ resources:
     name: $(GITHUB_SERVICE_CONNECTION)/my-first-container-app
 
 stages:
-# Build and push image
+# 1. Build Stage
 - stage: Build
-  displayName: Build & Push to ACR
+  displayName: Build & Push Image
   jobs:
   - job: Build
     steps:
@@ -71,19 +78,25 @@ stages:
         docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(SetEnvs.imageTag)
       displayName: "Build & Push Docker Image"
 
-# - stage: Test
-#   displayName: Run Tests
-#   dependsOn: Build
-#   jobs:
-#   - job: RunTests
-#     steps:
-#       - bash: |
-#           echo "Running tests..."
-#         displayName: "Run Unit/Integration Tests"
+# 2. Test Stage
+- stage: Test
+  displayName: Run Tests
+  dependsOn: Build
+  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop'))
+  jobs:
+  - job: RunTests
+    steps:
+      - bash: |
+          echo "Running tests..."
+        displayName: "Run Unit/Integration Tests"
 
+# 3. Migrate Stage
 - stage: Migrate
   displayName: Run Django Migrations Job
-  dependsOn: Build
+  dependsOn:
+    - Test
+    - Build
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'develop')))
   jobs:
     - job: RunMigrationJob
       variables:
@@ -132,35 +145,50 @@ stages:
                 sleep 5
               done
 
+# 4. Deploy Stage
 - stage: Deploy
   displayName: "Deploy Container Apps"
   dependsOn:
     - Build
     - Migrate
+  variables:
+    # Reference output from Build job
+    IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
+    ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'develop')))
   jobs:
-    - job: Deploy
-      variables:
-        # Reference output from Build job
-        IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
-        ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
-      steps:
-      - task: AzureCLI@2
-        displayName: "Deploy all apps"
-        inputs:
-          azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-            echo "Deploying image: $(IMAGE_NAME):$IMAGE_TAG"
+    - deployment: DeployToEnv
+      displayName: Deploy Container App
+      environment: ${{ if eq(variables['Build.SourceBranchName'], 'main') }} dev
+                  ${{ else }} prod
 
-            az containerapp update \
-              --name $ENV_NAME-app \
-              --resource-group $ENV_NAME-rg \
-              --container-name api \
-              --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: AzureCLI@2
+              displayName: "Deploy all apps"
+              inputs:
+                azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  echo "Deploying image: $(IMAGE_NAME):$IMAGE_TAG"
 
-            az containerapp update \
-              --name $ENV_NAME-app \
-              --resource-group $ENV_NAME-rg \
-              --container-name worker \
-              --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+                  az containerapp update \
+                    --name $ENV_NAME-app \
+                    --resource-group $ENV_NAME-rg \
+                    --container-name api \
+                    --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+
+                  az containerapp update \
+                    --name $ENV_NAME-app \
+                    --resource-group $ENV_NAME-rg \
+                    --container-name worker \
+                    --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+
+                  az containerapp update \
+                    --name $ENV_NAME-app \
+                    --resource-group $ENV_NAME-rg \
+                    --container-name beat \
+                    --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
