@@ -90,8 +90,8 @@ stages:
     - job: Deploy
       variables:
         # Reference output from Build job
-        IMAGE_TAG: $[ dependencies.Build.outputs['SetEnvs.imageTag'] ]
-        RG_NAME: $[ dependencies.Build.outputs['SetEnvs.rgName'] ]
+        IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
+        RG_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.rgName'] ]
       steps:
       - task: AzureCLI@2
         displayName: "Deploy all apps"
