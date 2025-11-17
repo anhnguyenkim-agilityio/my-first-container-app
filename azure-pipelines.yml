@@ -134,7 +134,9 @@ stages:
 
 - stage: Deploy
   displayName: "Deploy Container Apps"
-  dependsOn: Migrate
+  dependsOn:
+    - Build
+    - Migrate
   jobs:
     - job: Deploy
       variables:
