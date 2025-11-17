@@ -52,8 +52,8 @@ stages:
         echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$IMAGE_TAG"
         echo "##vso[task.setvariable variable=RG_NAME;isOutput=true]$RG_NAME"
         echo "Image tag will be: $IMAGE_TAG"
-        export IMAGE_TAG
-        export RG_NAME
+        export IMAGE_TAG="$IMAGE_TAG"
+        export RG_NAME="$RG_NAME"
       name: SetImageTag
       displayName: "Set image tag"
 
