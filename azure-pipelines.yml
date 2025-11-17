@@ -103,6 +103,11 @@ stages:
             az containerapp update \
               --name $ENV_NAME-app \
               --resource-group $ENV_NAME-rg \
-              --containers '[{"name":"api","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"},
-                            {"name":"worker","image":"$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"}]'
-# --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+              --container-name api \
+              --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+
+            az containerapp update \
+              --name $ENV_NAME-app \
+              --resource-group $ENV_NAME-rg \
+              --container-name worker \
+              --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
