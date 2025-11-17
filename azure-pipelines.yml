@@ -37,6 +37,7 @@ stages:
     # Set IMAGE_TAG and RG_NAME
     - bash: |
         echo "Branch name: $(Build.SourceBranchName)"
+        # Detect environment from branch
         if [ "$(Build.SourceBranchName)" = "main" ]; then
           ENV_NAME="dev"
         elif [ "$(Build.SourceBranchName)" = "staging" ]; then
@@ -48,7 +49,14 @@ stages:
         SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
         IMAGE_TAG="${ENV_NAME}-$SHORT_SHA"
         RG_NAME="${ENV_NAME}-rg"
+        echo "Image tag: $IMAGE_TAG"
+        echo "Resource group: $RG_NAME"
 
+        # Export variables for use in subsequent steps in this job
+        export IMAGE_TAG="$IMAGE_TAG"
+        export RG_NAME="$RG_NAME"
+
+        # Also set output variables for next stage
         echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$IMAGE_TAG"
         echo "##vso[task.setvariable variable=RG_NAME;isOutput=true]$RG_NAME"
       name: SetImageTag
