@@ -15,6 +15,12 @@ variables:
   - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
     value: "AzureConnection"
 
+  - name: RG_NAME
+    value: "dev-rg"
+
+  - name: containerApps
+    value: "dev-app"
+
 pool:
   name: Default
 
@@ -31,6 +37,15 @@ stages:
   jobs:
   - job: Build
     steps:
+    - bash: |
+        if [ "$(Build.SourceBranchName)" == "main" ]; then
+          echo "##vso[task.setvariable variable=ENV]dev"
+        fi
+        SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
+        IMAGE_TAG="$(ENV)-${SHORT_SHA}"
+        echo "##vso[task.setvariable variable=IMAGE_TAG]$IMAGE_TAG"
+        echo "Image tag will be: $IMAGE_TAG"
+      displayName: "Set image tag"
 
     - task: AzureCLI@2
       displayName: "Login to ACR"
@@ -42,21 +57,32 @@ stages:
           az acr login --name $(ACR_NAME)
 
     - script: |
-        IMAGE_TAG=$(Build.BuildId)
-        echo "##vso[task.setvariable variable=imageTag]$IMAGE_TAG"
-        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
-
-        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG .
-        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG
+        echo "Building image: $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
+        docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG) .
+        docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)
       displayName: "Build & Push Docker Image"
-  # - stage: Deploy
-  #   displayName: "Deploy SWA per Environment"
-  #   jobs:
-  #     - job: Deploy
-  #       displayName: "Deploy Static Web App"
-  #       pool:
-  #         name: Default
-  #       steps:
+  - stage: Deploy
+    displayName: "Deploy Container Apps"
+    dependsOn: Build
+    jobs:
+      - job: Deploy
+        steps:
+        - task: AzureCLI@2
+          displayName: "Deploy all apps"
+          inputs:
+            azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              echo "Deploying image: $(IMAGE_NAME):$(IMAGE_TAG)"
+
+              for app in $(containerApps); do
+                echo "Updating $app ..."
+                az containerapp update \
+                  --name $app \
+                  --resource-group $(RG_NAME) \
+                  --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(IMAGE_TAG)"
+              done
   #         - checkout: self
 
   #         - script: |
