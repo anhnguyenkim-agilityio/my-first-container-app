@@ -186,14 +186,14 @@ stages:
                     --container-name api \
                     --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
 
-                  az containerapp update \
-                    --name $(env)-app \
-                    --resource-group $(env)-rg \
-                    --container-name worker \
-                    --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+                  # az containerapp update \
+                  #   --name $(env)-app \
+                  #   --resource-group $(env)-rg \
+                  #   --container-name worker \
+                  #   --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
 
-                  az containerapp update \
-                    --name $(env)-app \
-                    --resource-group $(env)-rg \
-                    --container-name beat \
-                    --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
+                  # az containerapp update \
+                  #   --name $(env)-app \
+                  #   --resource-group $(env)-rg \
+                  #   --container-name beat \
+                  #   --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
