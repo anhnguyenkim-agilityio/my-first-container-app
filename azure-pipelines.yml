@@ -12,7 +12,7 @@ pr:
 
 variables:
   - name: ACR_NAME
-    value: "containerApps"
+    value: "dratiniacr"
 
   - name: IMAGE_NAME
     value: "dratini"
