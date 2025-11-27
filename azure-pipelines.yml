@@ -12,9 +12,10 @@ pr:
 
 variables:
   - name: ACR_NAME
-    value: "f2kwkhdb8vhvacr"
+    value: "containerApps"
+
   - name: IMAGE_NAME
-    value: "samples/hello-world"
+    value: "dratini"
 
   - name: GITHUB_SERVICE_CONNECTION
     value: "github.com_anhnguyenkim-agilityio"
@@ -22,8 +23,20 @@ variables:
   - name: AZURE_SUBSCRIPTION_SERVICE_CONNECTION
     value: "AzureConnection"
 
-  - name: containerApps
-    value: "dev-app"
+  - name: env
+    value: 'dev'   # default fallback
+
+  - ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
+    - name: env
+      value: 'dev'
+
+  - ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
+    - name: env
+      value: 'stag'
+
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    - name: env
+      value: 'prod'
 
 pool:
   name: Default
@@ -43,18 +56,8 @@ stages:
     steps:
     # Set IMAGE_TAG and RG_NAME
     - bash: |
-        echo "Branch name: $(Build.SourceBranchName)"
-        # Detect environment from branch
-        if [ "$(Build.SourceBranchName)" = "main" ]; then
-          ENV_NAME="dev"
-        elif [ "$(Build.SourceBranchName)" = "staging" ]; then
-          ENV_NAME="staging"
-        else
-          ENV_NAME="dev"
-        fi
-
         SHORT_SHA=$(echo $(Build.SourceVersion) | cut -c1-7)
-        IMAGE_TAG="${ENV_NAME}-$SHORT_SHA"
+        IMAGE_TAG="$(env)-$SHORT_SHA"
         echo "Image tag: $IMAGE_TAG"
 
         echo "##vso[task.setvariable variable=imageTag;isOutput=true]$IMAGE_TAG"
@@ -79,87 +82,90 @@ stages:
       displayName: "Build & Push Docker Image"
 
 # 2. Test Stage
-- stage: Test
-  displayName: Run Tests
-  dependsOn: Build
-  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'main'))
-  jobs:
-  - job: RunTests
-    steps:
-      - bash: |
-          echo "Running tests..."
-        displayName: "Run Unit/Integration Tests"
+# - stage: Test
+#   displayName: Run Tests
+#   dependsOn: Build
+#   condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'develop', eq(variables['Build.SourceBranchName'], 'staging', eq(variables['Build.SourceBranchName'], 'main'))
+#   jobs:
+#   - job: RunTests
+#     steps:
+#       - bash: |
+#           echo "Running tests..."
+#         displayName: "Run Unit/Integration Tests"
 
 # 3. Migrate Stage
-- stage: Migrate
-  displayName: Run Django Migrations Job
-  dependsOn:
-    - Test
-    - Build
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main')))
-  jobs:
-    - job: RunMigrationJob
-      variables:
-        # Reference output from Build job
-        ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
-      steps:
-        - task: AzureCLI@2
-          displayName: "Run Django Migration Job"
-          inputs:
-            azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
-            scriptType: bash
-            scriptLocation: inlineScript
-            inlineScript: |
-              echo "Starting migration job..."
-              az containerapp job start \
-                --name django-migrate-job \
-                --resource-group $ENV_NAME-rg
+# - stage: Migrate
+#   displayName: Run Django Migrations Job
+#   dependsOn:
+#     - Test
+#     - Build
+#   condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'staging'), eq(variables['Build.SourceBranchName'], 'main')))
+#   jobs:
+#     - job: RunMigrationJob
+#       variables:
+#         # Reference output from Build job
+#         ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
+#       steps:
+#         - task: AzureCLI@2
+#           displayName: "Run Django Migration Job"
+#           inputs:
+#             azureSubscription: "$(AZURE_SUBSCRIPTION_SERVICE_CONNECTION)"
+#             scriptType: bash
+#             scriptLocation: inlineScript
+#             inlineScript: |
+#               echo "Starting migration job..."
+#               az containerapp job start \
+#                 --name django-migrate-job \
+#                 --resource-group $ENV_NAME-rg
 
-              echo "Waiting for job to finish..."
+#               echo "Waiting for job to finish..."
 
-              # Fetch job execution status until 'Completed'
-              JOB_EXEC_ID=$(az containerapp job execution list \
-                --name django-migrate-job \
-                --resource-group $ENV_NAME-rg \
-                --query "[0].name" -o tsv)
+#               # Fetch job execution status until 'Completed'
+#               JOB_EXEC_ID=$(az containerapp job execution list \
+#                 --name django-migrate-job \
+#                 --resource-group $ENV_NAME-rg \
+#                 --query "[0].name" -o tsv)
 
-              while true; do
-                STATUS=$(az containerapp job execution show \
-                  --name django-migrate-job \
-                  --resource-group $ENV_NAME-rg \
-                  --job-execution-name $JOB_EXEC_ID \
-                  --query "properties.status" -o tsv)
+#               while true; do
+#                 STATUS=$(az containerapp job execution show \
+#                   --name django-migrate-job \
+#                   --resource-group $ENV_NAME-rg \
+#                   --job-execution-name $JOB_EXEC_ID \
+#                   --query "properties.status" -o tsv)
 
-                echo "Job status: $STATUS"
+#                 echo "Job status: $STATUS"
 
-                if [ "$STATUS" = "Succeeded" ]; then
-                  echo "Migration job succeeded."
-                  break
-                fi
+#                 if [ "$STATUS" = "Succeeded" ]; then
+#                   echo "Migration job succeeded."
+#                   break
+#                 fi
 
-                if [ "$STATUS" = "Failed" ]; then
-                  echo "Migration job FAILED."
-                  exit 1
-                fi
+#                 if [ "$STATUS" = "Failed" ]; then
+#                   echo "Migration job FAILED."
+#                   exit 1
+#                 fi
 
-                sleep 5
-              done
+#                 sleep 5
+#               done
 
 # 4. Deploy Stage
 - stage: Deploy
   displayName: "Deploy Container Apps"
   dependsOn:
     - Build
-    - Migrate
   variables:
     # Reference output from Build job
     IMAGE_TAG: $[ stageDependencies.Build.Build.outputs['SetEnvs.imageTag'] ]
-    ENV_NAME: $[ stageDependencies.Build.Build.outputs['SetEnvs.envName'] ]
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'develop')))
+  condition: |
+      and(
+        succeeded(),
+        ne(variables['Build.Reason'], 'PullRequest'),
+        in(variables['Build.SourceBranchName'], 'develop', 'staging', 'main')
+      )
   jobs:
     - deployment: DeployToEnv
       displayName: Deploy Container App
-      environment: 'dev'
+      environment: $(env)
 
       strategy:
         runOnce:
@@ -175,19 +181,19 @@ stages:
                   echo "Deploying image: $(IMAGE_NAME):$IMAGE_TAG"
 
                   az containerapp update \
-                    --name $ENV_NAME-app \
-                    --resource-group $ENV_NAME-rg \
+                    --name $(env)-app \
+                    --resource-group $(env)-rg \
                     --container-name api \
                     --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
 
                   az containerapp update \
-                    --name $ENV_NAME-app \
-                    --resource-group $ENV_NAME-rg \
+                    --name $(env)-app \
+                    --resource-group $(env)-rg \
                     --container-name worker \
                     --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
 
                   az containerapp update \
-                    --name $ENV_NAME-app \
-                    --resource-group $ENV_NAME-rg \
+                    --name $(env)-app \
+                    --resource-group $(env)-rg \
                     --container-name beat \
                     --image "$(ACR_NAME).azurecr.io/$(IMAGE_NAME):$IMAGE_TAG"
